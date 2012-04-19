@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+
+from datetime import datetime,timedelta
+import sys
+import re
+
+toParse =  ' '.join(sys.argv[1:])
+
+currentTime = datetime.now()
+
+weekdays = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
+             'sunday' ]
+weekdaysShort = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+months = ['january', 'february', 'march', 'april', 'may', 'june', 'july',
+          'august', 'september', 'october', 'november', 'december' ]
+monthsShort = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep',
+              'oct', 'nov', 'dec']
+
+hms = re.compile('(?P<hour>[0-9]+):(?P<minute>[0-9]{2}):(?P<second>[0-9]{2})')
+hm = re.compile('(?P<hour>[0-9]+):(?P<minute>[0-9]{2})')
+h = re.compile('(?P<hour>[0-9]+)')
+for part in sys.argv[1:]:
+  compare = part.lower()
+  if compare in weekdays or compare in weekdaysShort:
+    day = currentTime.weekday()
+    specDay = -1
+    try:
+      specDay = weekdays.index(compare)
+    except:
+      specDay = weekdaysShort.index(compare)
+    d = specDay - day
+    if d < 0:
+      d += 7
+    delta = timedelta(days=d)
+    currentTime += delta
+  elif compare in months or compare in monthsShort:
+    specMonth = -1
+    try:
+      specMonth = months.index(compare)
+    except:
+      specMonth = monthsShort.index(compare)
+    currentTime = currentTime.replace(month=specMonth + 1)
+  elif hms.match(compare):
+    timeData = hms.match(compare).groupdict()
+    for key, value in timeData.items():
+      timeData[key] = int(value)
+    timeData['microsecond'] = 0
+    currentTime = currentTime.replace(**timeData)
+  elif hm.match(compare):
+    timeData = hm.match(compare).groupdict()
+    for key, value in timeData.items():
+      timeData[key] = int(value)
+    timeData['second'] = 0
+    timeData['microsecond'] = 0
+    currentTime = currentTime.replace(**timeData)
+  elif h.match(compare):
+    timeData = h.match(compare).groupdict()
+    for key, value in timeData.items():
+      timeData[key] = int(value)
+    timeData['second'] = 0
+    timeData['minute'] = 0
+    timeData['microsecond'] = 0
+    currentTime = currentTime.replace(**timeData)
+  elif compare == 'pm':
+    if currentTime.hour == 12:
+      currentTime = currentTime.replace(hour = 0)
+    t = currentTime.hour
+    currentTime = currentTime.replace(hour = t + 12)
+  elif compare == 'am':
+    if currentTime.hour == 12:
+      currentTime = currentTime.replace(hour = 0)
+
+dueFile = open('.due', 'w')
+dueFile.write(currentTime.ctime())
