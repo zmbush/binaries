@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+import sys
+
+hexToBin = {
+  '0':'0000',
+  '1':'0001',
+  '2':'0010',
+  '3':'0011',
+  '4':'0100',
+  '5':'0101',
+  '6':'0110',
+  '7':'0111',
+  '8':'1000',
+  '9':'1001',
+  'A':'1010',
+  'B':'1011',
+  'C':'1100',
+  'D':'1101',
+  'E':'1110',
+  'F':'1111'
+}
+
+def hex2bin(hexStr): 
+  retval = ""
+  for char in hexStr[2:]:
+    retval += hexToBin[char]
+  return retval
+
+def bin2dec(binStr):
+  retval = 0
+  exponent = 0
+  for char in reversed(binStr):
+    if char == "1":
+      retval += 2 ** exponent
+    exponent += 1
+  return retval
+
+def printR(bits):
+  print "As an R type: "
+  print "opcode =", bin2dec(bits[:6])
+  print "rs =", bin2dec(bits[6:11])
+  print "rt =", bin2dec(bits[11:16])
+  print "rd =", bin2dec(bits[16:21])
+  print "shamt =", bin2dec(bits[21:26])
+  print "funct =", bin2dec(bits[26:32])
+  print
+
+def printI(bits):
+  print "As an I type: "
+  print "opcode =", bin2dec(bits[:6])
+  print "rs =", bin2dec(bits[6:11])
+  print "rt =", bin2dec(bits[11:16])
+  print "immediate =", bin2dec(bits[16:])
+  print
+
+def printJ(bits):
+  print "As a J type:"
+  print "opcode =", bin2dec(bits[:6])
+  print "address = ", bin2dec(bits[6:])
+
+if len(sys.argv) > 1:
+  bits = hex2bin(sys.argv[1])
+
+  print "Binary:"
+  print bits
+  print
+
+  printR(bits)
+  printI(bits)
+  printJ(bits)
+else:
+  print "You must supply a hexadecimal instruction"
