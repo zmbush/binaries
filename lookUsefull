@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+import random
+import sys
+
+characters = ['{', '}'] * 2 + [' '] * 5
+for i in range(26):
+  characters.append(chr(ord('a') + i))
+def generateRandomString(length):
+  retval = ''
+  for i in range(length):
+    char = characters[random.randint(0, len(characters) - 1)]
+    if len(retval) > 5:
+      char = characters[random.randint(4, len(characters) - 1)]
+    retval += char
+    if char == '{' or char == '}': 
+      return retval 
+  return retval + ';'
+
+ran = range(int(sys.argv[1]))
+print ran
+for i in ran:
+  print generateRandomString(80)
