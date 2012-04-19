@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import sys
+import struct
+import binascii
+
+def dec2bin(dec):
+  if dec == 0:
+    return ''
+  if (dec & 1) == 0:
+    return dec2bin(dec >> 1) + '0'
+  else:
+    return dec2bin(dec >> 1) + '1'
+
+def potentialMatches(buf, enc):
+  retval = []
+  for b in enc:
+    if buf in b:
+      retval.append(enc[b])
+  return retval
+
+def main():
+  if len(sys.argv) < 2:
+    f = sys.stdin
+  else:
+    f = open(sys.argv[1], 'rb')
+  raw = f.read()
+  code = struct.unpack_from('i', raw)[0]
+  encoding = 0
+  offset = 4
+  encodings = {}
+  print >> sys.stderr, "Reading cypher"
+  while encoding != code:
+    character = struct.unpack_from('c', raw, offset)[0]
+    offset += 1
+    encoding =  struct.unpack_from('i', raw, offset)[0]
+    strenc = dec2bin(encoding)[1:]
+    encodings[strenc] = character
+    offset += 4
+  print >> sys.stderr,  "Cypher Read"
+  binbuff = ''
+  print >> sys.stderr,  "Reading file to raw bits"
+  while offset < len(raw):
+    char = struct.unpack_from('c', raw, offset)[0]
+    offset += 1
+    bits = dec2bin(ord(char))
+    while len(bits) < 8:
+      bits = "0" + bits
+    binbuff += bits
+  previous = 0
+  consider = 0
+  chars = 0
+  print >> sys.stderr,  "Decrypting"
+  while consider < len(binbuff):
+    here = binbuff[previous:consider]
+    if here in encodings:
+      chars += 1
+      sys.stdout.write(encodings[here])
+      if (chars % 100) == 0:
+        sys.stdout.flush()
+      previous = consider
+    consider += 1
+if __name__ == '__main__':
+  main()

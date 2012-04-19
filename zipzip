@@ -1,0 +1,98 @@
+#!/usr/bin/env python
+
+import sys
+import heapq
+import struct
+import math
+
+def print_tree(tree, prefix = ""):
+  if isinstance(tree, basestring):
+    print prefix + tree
+    return
+  print_tree(tree[1], prefix + "/")
+  print prefix + "*"
+  print_tree(tree[0], prefix + "\\")
+
+def set_keys(keys, tree, prefix = ""):
+  if isinstance(tree, basestring):
+    keys[tree] = prefix
+  else:
+    keys = set_keys(keys, tree[1], prefix + '1')
+    keys = set_keys(keys, tree[0], prefix + '0')
+  return keys
+
+freq = {}
+def main():
+  if len(sys.argv) < 2:
+    print "You must specify a file"
+    return -1
+  else:
+    f = open(sys.argv[1], 'r')
+    text = list(f.read())
+    freq['\0'] = 0
+    print "Calculating Frequencies"
+    for char in text:
+      if char in freq:
+        freq[char] += 1
+      else:
+        freq[char] = 1
+    keys = []
+    print "Calculating Huffman Codes"
+    for key in freq:
+      heapq.heappush(keys, (freq[key], key))
+    while len(keys) > 1:
+      lv, lt = heapq.heappop(keys)
+      rv, rt = heapq.heappop(keys)
+      nv = lv + rv
+      nt = [lt, rt]
+      heapq.heappush(keys, (nv, nt))
+    print "Huffman Tree Created"
+    values = {}
+    values = set_keys(values, keys[0][1])
+    f = open(sys.argv[1] + '.zzip', 'wb')
+    num = 0
+    for bit in values['\0']:
+      num <<= 1
+      if bit == '1':
+        num |= 1
+    tag = struct.pack('i', num)
+    print "Writing cypher"
+    f.write(tag)
+    for c in values:
+      if c == '\0':
+        continue
+      f.write(struct.pack('c', c))
+      num = 1
+      for bit in values[c]:
+        num <<= 1
+        if bit == '1':
+          num |= 1
+      f.write(struct.pack('i', num))
+    f.write(struct.pack('c', '\0'))
+    f.write(tag)
+    bits = ''
+    print "Creating raw bits"
+    for char in text:
+      bits += values[char]
+    current = ''
+    print "Writing Bits"
+    i = 0
+    lastPrinted = -1
+    for bit in bits:
+      perc = math.ceil(((float(i) / len(bits)) * 100))
+      if (perc % 10) == 0:
+        if lastPrinted != perc:
+          print '%d%s' % (perc, '%')
+          lastPrinted = perc
+      i += 1
+      current += bit
+      if len(current) == 8:
+        output = 0
+        for bit in current:
+          output <<= 1
+          if bit == '1':
+            output |= 1
+        f.write(struct.pack("B", output))
+        current = ''
+if __name__ == "__main__":
+  sys.exit(main())
