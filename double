@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cat $1 > /tmp/$1
+cat $1 >> /tmp/$1
+cat /tmp/$1 > $1
