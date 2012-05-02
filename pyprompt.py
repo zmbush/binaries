@@ -272,12 +272,14 @@ def getDue(parts):
     pastDue = True
 
   due = ""
-  offsets = [60*60*24*365*10, 60*60*24*365, 60*60*24*30, 60*60*24, 60*60, 60, 1]
-  units = ['decade', 'year', 'month', 'day', 'hour', 'minute', 'second']
+  ups = [10, 365, 24, 60, 60, 1]
+  offsets = [reduce(lambda a, b: a*b, ups[n:]) for n in range(len(ups))] +     \
+                                                                   [60*60*24*30]
+  amounts = ['decade', 'year', 'day', 'hour', 'minute', 'second', 'month']
+  units = reversed(sorted(zip(offsets, amounts)))
+ 
   v = seconds
-  for i in range(len(offsets)):
-    offset = offsets[i]
-    unit = units[i]
+  for offset, unit in units:
     this = v / offset
     if this > 1:
       due += "%d %ss " % (this, unit)
