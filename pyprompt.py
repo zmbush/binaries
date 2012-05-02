@@ -268,31 +268,22 @@ def getDue(parts):
   seconds = int(timeData - now)
   pastDue = False
   if seconds < 0:
-    seconds -= 2*seconds
+    seconds = -seconds
     pastDue = True
-  days = seconds / (60 * 60 * 24)
-  seconds = seconds % (60 * 60 * 24)
-  hours = seconds / (60 * 60)
-  seconds = seconds % (60 * 60)
-  minutes = seconds / 60
-  seconds = seconds % 60
+
   due = ""
-  if days > 1:
-    due += "%d days " % days
-  elif days > 0:
-    due += "%d day " % days
-  if hours > 1:
-    due += "%d hours " % hours
-  elif hours > 0:
-    due += "%d hour " % hours
-  if minutes > 1:
-    due += "%d minutes " % minutes
-  elif minutes > 0:
-    due += "%d minute " % minutes
-  if seconds > 1:
-    due += "%d seconds " % seconds
-  elif seconds > 0:
-    due += "%d second " % seconds
+  offsets = [60*60*24, 60*60, 60, 1]
+  units = ['day', 'hour', 'minute', 'second']
+  v = seconds
+  for i in range(len(offsets)):
+    offset = offsets[i]
+    unit = units[i]
+    this = v / offset
+    if this > 1:
+      due += "%d %ss " % (this, unit)
+    elif this > 0:
+      due += "%d %s " % (this, unit)
+    v = v % offset
 
   due = due.strip()
   line = lines[TOP | BOTTOM | RIGHT] + lines[LEFT | RIGHT]
