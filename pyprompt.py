@@ -11,6 +11,7 @@ import sys
 import os
 import subprocess
 import time
+import StringIO
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -31,6 +32,11 @@ lines = {
   TOP | BOTTOM | LEFT | RIGHT : '┼',
         BOTTOM | LEFT | RIGHT : '┬'
 }
+
+def getSubprocessOutput(arguments):
+  s = subprocess.Popen(arguments, stdout=subprocess.PIPE)
+  return s.communicate()[0]
+
 def bgcolor(col, bg):
   return '\[\033[0;%d;%dm\]' % (col + 30, bg + 40)
 
@@ -106,9 +112,9 @@ def getWeb(parts):
 def isGit():
   null = open('/dev/null')
   try:
-    subprocess.check_output(['git', 'rev-parse', '--git-dir'], stderr=null)
+    subprocess.call(['git', 'rev-parse', '--git-dir'], stderr=null)
     return True
-  except:
+  except subprocess.CalledProcessError as e:
     return False
 
 def colorStat(stat):
@@ -135,8 +141,8 @@ def colorStat(stat):
   return stat
 
 def gitStatus(parts):
-  status = subprocess.check_output(['git', 'status', '-s'])
-  gitDir = subprocess.check_output(['git', 'rev-parse', '--git-dir'])
+  status = getSubprocessOutput(['git', 'status', '-s'])
+  gitDir = getSubprocessOutput(['git', 'rev-parse', '--git-dir'])
   baseDir = '/'.join(gitDir.split('/')[:-1]) + '/'
   cwd = os.getcwd() + '/'
   repoDir = cwd.replace(baseDir, "")
@@ -157,7 +163,7 @@ def gitStatus(parts):
     return False
 
 def gitBranch():
-  branches = subprocess.check_output(['git', 'branch']).split('\n')
+  branches = getSubprocessOutput(['git', 'branch']).split('\n')
   for b in branches:
     if b == '':
       continue
@@ -170,7 +176,7 @@ def gitRemote(branch):
   if branch == '':
     return ''
   try:
-    return subprocess.check_output(['git', 'config', 
+    return getSubprocessOutput(['git', 'config', 
                     'branch.' + branch + '.remote'], stderr=none).split('\n')[0]
   except:
     return '?'
@@ -179,8 +185,8 @@ def gitOutgoing(parts, indented):
   none = open('/dev/null')
   try:
     remote = gitRemote(gitBranch())
-    outgoing = subprocess.check_output(['git', 'log', '@{u}..', 
-                          '--pretty=format:%h %s'], stderr=none).split('\n')
+    outgoing = getSubprocessOutput(['git', 'log', '@{u}..', 
+                          '--pretty=format:%h %s']).split('\n')
     outgoing = filter(bool, outgoing)
     if len(outgoing) > 0:
       line = lines[TOP | RIGHT] + lines[LEFT | RIGHT | BOTTOM] +               \
