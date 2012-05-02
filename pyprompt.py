@@ -97,7 +97,9 @@ def getWeb(parts):
       parts.append(line + box('http://' + wwwStuff[2] + '.' + wwwStuff[1] + '/' 
                               + '/'.join(wwwStuff[3:])) + trailOff())
   else:
-    line += box('/'.join(cwd).replace(os.environ['HOME'], '~')) + trailOff()
+    line += box('/'.join(cwd).replace(os.environ['HOME'], '~')) 
+    line += lines[LEFT | RIGHT]
+    line += box("\H") + trailOff()
     parts.append(line)
   return parts
 
