@@ -13,10 +13,9 @@ import time
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
-TOP    = 0b1000
-BOTTOM = 0b0100
-LEFT   = 0b0010
-RIGHT  = 0b0001
+FLAGS = [1<<n for n in range(32)]
+TOP, BOTTOM, LEFT, RIGHT = FLAGS[:4]
+
 lines = {
   TOP                 | RIGHT : '└',
   TOP          | LEFT         : '┘',
@@ -272,19 +271,29 @@ def getDue(parts):
     pastDue = True
 
   due = ""
-  ups = [10, 365, 24, 60, 60, 1]
+  ups = [10, 10, 10, 365, 24, 60, 60, 1]
   offsets = [reduce(lambda a, b: a*b, ups[n:]) for n in range(len(ups))] +     \
                                                                    [60*60*24*30]
-  amounts = ['decade', 'year', 'day', 'hour', 'minute', 'second', 'month']
+  amounts = [('millennium', 'millennia'), ('century', 'centuries'), 
+                   'decade', 'year', 'day', 'hour', 'minute', 'second', 'month']
   units = reversed(sorted(zip(offsets, amounts)))
  
   v = seconds
   for offset, unit in units:
     this = v / offset
+    if type(unit) is tuple:
+      singular = unit[0]
+      plural = unit[1]
+    else:
+      singular = unit
+      plural = unit + "s"
+
     if this > 1:
-      due += "%d %ss " % (this, unit)
+      due += "%d %s " % (this, plural)
+      break
     elif this > 0:
-      due += "%d %s " % (this, unit)
+      due += "%d %s " % (this, singular)
+      break
     v = v % offset
 
   due = due.strip()
