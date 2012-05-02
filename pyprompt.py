@@ -111,6 +111,12 @@ def getWeb(parts):
     parts.append(line)
   return parts
 
+def getMain(parts):
+  line = reset() + lines[BOTTOM | RIGHT] + lines[LEFT | RIGHT]
+  line += box('\w') + lines[LEFT | RIGHT] + box('\H') + trailOff()
+  parts.append(line)
+  return parts
+
 def isGit():
   null = open('/dev/null')
   try:
@@ -307,7 +313,8 @@ def getDue(parts):
 
 def main():
   parts = []
-  getWeb(parts)
+  getMain(parts)
+  # getWeb(parts)
   getDue(parts)
   getGit(parts)
   # prompt = getWeb()
