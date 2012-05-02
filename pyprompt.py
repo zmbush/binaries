@@ -3,15 +3,13 @@
 """
   To use this file, add the following lines to:
 
-  export PROMPT_COMMAND='PS1=/path/to/this/file'
-  export PS1 PROMPT_COMMAND
+  export PROMPT_COMMAND='PS1=$(python /path/to/this/file.py)'
 """
 
 import sys
 import os
 import subprocess
 import time
-import StringIO
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -34,8 +32,12 @@ lines = {
 }
 
 def getSubprocessOutput(arguments):
-  s = subprocess.Popen(arguments, stdout=subprocess.PIPE)
-  return s.communicate()[0]
+  s = subprocess.Popen(arguments, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  s.wait()
+  if s.returncode == 0:
+    return s.communicate()[0]
+  else:
+    raise subprocess.CalledProcessError
 
 def bgcolor(col, bg):
   return '\[\033[0;%d;%dm\]' % (col + 30, bg + 40)
@@ -112,8 +114,13 @@ def getWeb(parts):
 def isGit():
   null = open('/dev/null')
   try:
-    subprocess.call(['git', 'rev-parse', '--git-dir'], stderr=null)
-    return True
+    s = subprocess.Popen(['git', 'rev-parse', '--git-dir'],
+                         stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    s.wait()
+    if s.returncode == 0:
+      return True
+    else:
+      return False
   except subprocess.CalledProcessError as e:
     return False
 
@@ -177,7 +184,7 @@ def gitRemote(branch):
     return ''
   try:
     return getSubprocessOutput(['git', 'config', 
-                    'branch.' + branch + '.remote'], stderr=none).split('\n')[0]
+                    'branch.' + branch + '.remote']).split('\n')[0]
   except:
     return '?'
 
