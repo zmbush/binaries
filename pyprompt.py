@@ -272,8 +272,8 @@ def getDue(parts):
     pastDue = True
 
   due = ""
-  offsets = [60*60*24, 60*60, 60, 1]
-  units = ['day', 'hour', 'minute', 'second']
+  offsets = [60*60*24*365, 60*60*24*30, 60*60*24, 60*60, 60, 1]
+  units = ['year', 'month', 'day', 'hour', 'minute', 'second']
   v = seconds
   for i in range(len(offsets)):
     offset = offsets[i]
