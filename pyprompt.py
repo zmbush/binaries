@@ -36,7 +36,7 @@ def getSubprocessOutput(arguments):
   if s.returncode == 0:
     return s.communicate()[0]
   else:
-    raise subprocess.CalledProcessError
+    raise subprocess.CalledProcessError('fail', 'fail')
 
 def bgcolor(col, bg):
   return '\[\033[0;%d;%dm\]' % (col + 30, bg + 40)
@@ -90,7 +90,7 @@ def getWeb(parts):
     elif len(wwwStuff) < 3:
       line += box(wwwStuff[1]) + trailOff()
       parts.append(line)
-      parts.append(lines[TOP | RIGHT] + lines[LEFT | BOTTOM | RIGHT] + 
+      parts.append(lines[TOP | RIGHT] + lines[LEFT | BOTTOM | RIGHT] +
                     trailOff())
       sites = sorted(os.listdir('.'))
       if len(sites) > 0:
@@ -98,13 +98,13 @@ def getWeb(parts):
           parts.append(' %s %s%s.%s%s' %(lines[TOP | BOTTOM], color(RED),
                                      sites[i], wwwStuff[1], reset()))
         parts.append('%s%s %s%s.%s%s' % (lines[BOTTOM | RIGHT],
-                               lines[TOP | LEFT], color(RED), 
+                               lines[TOP | LEFT], color(RED),
                                sites[len(sites) - 1], wwwStuff[1], reset()))
     else:
-      parts.append(line + box('http://' + wwwStuff[2] + '.' + wwwStuff[1] + '/' 
+      parts.append(line + box('http://' + wwwStuff[2] + '.' + wwwStuff[1] + '/'
                               + '/'.join(wwwStuff[3:])) + trailOff())
   else:
-    line += box('/'.join(cwd).replace(os.environ['HOME'], '~')) 
+    line += box('/'.join(cwd).replace(os.environ['HOME'], '~'))
     line += lines[LEFT | RIGHT]
     line += box("\H") + trailOff()
     parts.append(line)
@@ -183,21 +183,43 @@ def gitBranch():
       return b[2:]
   return ''
 
+def hasBranch(branch):
+  branches = getSubprocessOutput(['git', 'branch']).split('\n')
+  for b in branches:
+    if b == '':
+      continue
+    if b[2:] == branch:
+      return True
+  return False
+
+def hasRemote(remote):
+  remotes = getSubprocessOutput(['git', 'branch', '-r']).split('\n')
+  for r in remotes:
+    if r == '':
+      continue
+    if r[2:] == remote:
+      return True
+  return False
+
+
 def gitRemote(branch):
   none = open('/dev/null')
   if branch == '':
     return ''
   try:
-    return getSubprocessOutput(['git', 'config', 
+    return getSubprocessOutput(['git', 'config',
                     'branch.' + branch + '.remote']).split('\n')[0]
   except:
-    return '?'
+    if hasRemote('git-svn'):
+      return 'git-svn'
+    else:
+      return '?'
 
-def gitOutgoing(parts, indented):
+def gitOutgoing(parts, remote, indented):
   none = open('/dev/null')
   try:
     remote = gitRemote(gitBranch())
-    outgoing = getSubprocessOutput(['git', 'log', '@{u}..', 
+    outgoing = getSubprocessOutput(['git', 'log', remote + '..',
                           '--pretty=format:%h %s']).split('\n')
     outgoing = filter(bool, outgoing)
     if len(outgoing) > 0:
@@ -207,7 +229,7 @@ def gitOutgoing(parts, indented):
         line = ' ' + lines[RIGHT | TOP | BOTTOM] +                             \
                        lines[LEFT | RIGHT]
       line += box("Git Outgoing", color(CYAN))
-      line += trailOff() 
+      line += trailOff()
       parts.append(line)
       for out in outgoing:
         parts.append(' %s %s' % (lines[TOP | BOTTOM], out))
@@ -241,7 +263,7 @@ def finalizeGit(parts, indented):
 def getGit(parts):
   if isGit():
     indented = gitStatus(parts)
-    indented = gitOutgoing(parts, indented)
+    indented = gitOutgoing(parts, gitRemote(gitBranch()), indented)
     finalizeGit(parts, indented)
   return parts
 
@@ -274,10 +296,10 @@ def getDue(parts):
   ups = [10, 10, 10, 365, 24, 60, 60, 1]
   offsets = [reduce(lambda a, b: a*b, ups[n:]) for n in range(len(ups))] +     \
                                                                    [60*60*24*30]
-  amounts = [('millennium', 'millennia'), ('century', 'centuries'), 
+  amounts = [('millennium', 'millennia'), ('century', 'centuries'),
                    'decade', 'year', 'day', 'hour', 'minute', 'second', 'month']
   units = reversed(sorted(zip(offsets, amounts)))
- 
+
   v = seconds
   for offset, unit in units:
     this = v / offset
@@ -308,7 +330,7 @@ def getDue(parts):
     mess += due
     if pastDue:
       mess += " ago"
-  else: 
+  else:
     mess = "Project due: " + color(CYAN) + "now"
   line += box(mess) + trailOff()
   parts.append(line)
