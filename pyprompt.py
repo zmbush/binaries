@@ -138,7 +138,7 @@ def colorStat(stat):
       return color(GREEN) + stat + reset()
     elif 'D' == check:
       return color(RED) + stat + reset()
-  else:
+  elif stat[1] == ' ':
     check = stat[0]
     if 'M' == check:
       return bcolor(BLUE) + stat + reset()
@@ -146,12 +146,16 @@ def colorStat(stat):
       return bcolor(GREEN) + stat + reset()
     elif 'D' == check:
       return bcolor(RED) + stat + reset()
-    elif '?' == check:
-      return bcolor(WHITE) + stat + reset()
     elif 'R' == check:
       return bcolor(CYAN) + stat + reset()
     elif 'U' == check:
       return bcolor(YELLOW) + stat + reset()
+  else:
+    check = stat[0:2]
+    if '??' == check:
+      return bcolor(WHITE) + stat + reset()
+    else:
+      return bcolor(RED) + stat + reset()
   return stat
 
 def gitStatus(parts):
