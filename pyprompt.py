@@ -147,9 +147,11 @@ def colorStat(stat):
     elif 'D' == check:
       return bcolor(RED) + stat + reset()
     elif '?' == check:
-      return bcolor(YELLOW) + stat + reset()
+      return bcolor(WHITE) + stat + reset()
     elif 'R' == check:
       return bcolor(CYAN) + stat + reset()
+    elif 'U' == check:
+      return bcolor(YELLOW) + stat + reset()
   return stat
 
 def gitStatus(parts):
