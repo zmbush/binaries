@@ -36,7 +36,7 @@ def getSubprocessOutput(arguments):
   if s.returncode == 0:
     return s.communicate()[0]
   else:
-    raise subprocess.CalledProcessError
+    raise subprocess.CalledProcessError(0, 0)
 
 def bgcolor(col, bg):
   return '\[\033[0;%d;%dm\]' % (col + 30, bg + 40)
