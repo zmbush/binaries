@@ -6,5 +6,9 @@ asciiio
 hc
 hunc
 j
+
+# Only on meraki devel vm
+fix-resolv
 *.swp
 *.so
+*.pyc
