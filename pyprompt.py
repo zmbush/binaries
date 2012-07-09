@@ -225,8 +225,12 @@ def gitOutgoing(parts, remote, indented):
   none = open('/dev/null')
   try:
     remote = gitRemote(gitBranch())
-    outgoing = getSubprocessOutput(['git', 'log', remote + '..',
-                          '--pretty=format:%h %s']).split('\n')
+    if remote == 'git-svn':
+      outgoing = getSubprocessOutput(['git', 'log', remote + '..',
+                            '--pretty=format:%h %s']).split('\n')
+    else:
+      outgoing = getSubprocessOutput(['git', 'log', '@{u}..',
+                            '--pretty=format:%h %s']).split('\n')
     outgoing = filter(bool, outgoing)
     if len(outgoing) > 0:
       line = lines[TOP | RIGHT] + lines[LEFT | RIGHT | BOTTOM] +               \
