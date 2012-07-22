@@ -17,17 +17,17 @@ FLAGS = [1<<n for n in range(32)]
 TOP, BOTTOM, LEFT, RIGHT = FLAGS[:4]
 
 lines = {
-  TOP                 | RIGHT : '└',
-  TOP          | LEFT         : '┘',
-  TOP | BOTTOM                : '│',
-                 LEFT | RIGHT : '─',
-        BOTTOM        | RIGHT : '┌',
-        BOTTOM | LEFT         : '┐',
-  TOP | BOTTOM | LEFT         : '┤',
-  TOP          | LEFT | RIGHT : '┴',
-  TOP | BOTTOM        | RIGHT : '├',
   TOP | BOTTOM | LEFT | RIGHT : '┼',
-        BOTTOM | LEFT | RIGHT : '┬'
+  TOP | BOTTOM | LEFT         : '┤',
+  TOP | BOTTOM        | RIGHT : '├',
+  TOP | BOTTOM                : '│',
+  TOP          | LEFT | RIGHT : '┴',
+  TOP          | LEFT         : '┘',
+  TOP                 | RIGHT : '└',
+        BOTTOM | LEFT         : '┐',
+        BOTTOM        | RIGHT : '┌',
+        BOTTOM | LEFT | RIGHT : '┬',
+                 LEFT | RIGHT : '─',
 }
 
 def getSubprocessOutput(arguments):
