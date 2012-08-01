@@ -271,7 +271,7 @@ def finalizeGit(parts, indented):
   parts.append(line)
 
 def getGit(parts):
-  if isGit():
+  if isGit() and not '.git' in os.getcwd():
     indented = gitStatus(parts)
     indented = gitOutgoing(parts, gitRemote(gitBranch()), indented)
     finalizeGit(parts, indented)
