@@ -10,6 +10,7 @@ import sys
 import os
 import subprocess
 import time
+import signal
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -29,6 +30,28 @@ lines = {
   TOP | BOTTOM | LEFT | RIGHT : '┼',
         BOTTOM | LEFT | RIGHT : '┬'
 }
+
+
+def createTimeout(seconds):
+  class TimeoutException(Exception):
+    pass
+
+  def timeout_function(f1):
+    def f2(*args):
+      def timeoutHandler(signum, frame):
+        raise TimeoutException()
+      old_handler = signal.signal(signal.SIGALRM, timeoutHandler)
+      signal.setitimer(signal.ITIMER_REAL, seconds)
+      try:
+        retval = f1(*args)
+      except TimeoutException:
+        retval = False
+      finally:
+        signal.signal(signal.SIGALRM, old_handler)
+      signal.alarm(0)
+      return retval
+    return f2
+  return timeout_function
 
 def getSubprocessOutput(arguments):
   s = subprocess.Popen(arguments, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -277,6 +300,55 @@ def getGit(parts):
     finalizeGit(parts, indented)
   return parts
 
+@createTimeout(.1)
+def isSvn():
+  null = open('/dev/null')
+  try:
+    s = subprocess.Popen(['svn', 'pl'],
+                         stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    s.wait()
+    if s.returncode == 0:
+      return True
+    else:
+      return False
+  except subprocess.CalledProcessError as e:
+    return False
+
+@createTimeout(.5)
+def svnStatus(parts):
+  status = getSubprocessOutput(['svn', 'status'])
+  statuses = filter(bool, status.split('\n'))
+  if len(statuses) > 0:
+    retval = lines[TOP | RIGHT] + lines[LEFT | RIGHT | BOTTOM] +  \
+             lines[LEFT | RIGHT]
+    retval += box("Svn Status", color(CYAN))
+    retval += trailOff()
+    parts.append(retval)
+    for s in statuses:
+      stat = s[:2]
+      rest = s[3:]
+      # s =
+      # s.replace(repoDir,
+          # "")
+      parts.append(' %s %s' % (lines[TOP | BOTTOM], colorStat(s)))
+    return True
+  else:
+    return False
+
+def finalizeSvn(parts, indented):
+  line = lines[TOP | BOTTOM | RIGHT] + lines[LEFT | RIGHT]
+  if indented:
+    line = lines[BOTTOM | RIGHT] + lines[TOP | LEFT | RIGHT]
+    line += trailOff()
+  parts.append(line)
+
+@createTimeout(.5)
+def getSvn(parts):
+  if isSvn():
+    changes = svnStatus(parts)
+    finalizeSvn(parts, changes)
+  return parts
+
 def getDue(parts):
   currDir = os.getcwd().split('/')
   success = False
@@ -351,6 +423,7 @@ def main():
   # getWeb(parts)
   getDue(parts)
   getGit(parts)
+  getSvn(parts)
   # prompt = getWeb()
   # prompt += getGit()
   parts.append(lines[TOP | RIGHT] + lines[LEFT | RIGHT] + color(RED) + "\$ " + 
