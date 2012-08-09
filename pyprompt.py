@@ -18,17 +18,17 @@ FLAGS = [1<<n for n in range(32)]
 TOP, BOTTOM, LEFT, RIGHT = FLAGS[:4]
 
 lines = {
-  TOP                 | RIGHT : '└',
-  TOP          | LEFT         : '┘',
-  TOP | BOTTOM                : '│',
-                 LEFT | RIGHT : '─',
-        BOTTOM        | RIGHT : '┌',
-        BOTTOM | LEFT         : '┐',
-  TOP | BOTTOM | LEFT         : '┤',
-  TOP          | LEFT | RIGHT : '┴',
-  TOP | BOTTOM        | RIGHT : '├',
   TOP | BOTTOM | LEFT | RIGHT : '┼',
-        BOTTOM | LEFT | RIGHT : '┬'
+  TOP | BOTTOM | LEFT         : '┤',
+  TOP | BOTTOM        | RIGHT : '├',
+  TOP | BOTTOM                : '│',
+  TOP          | LEFT | RIGHT : '┴',
+  TOP          | LEFT         : '┘',
+  TOP                 | RIGHT : '└',
+        BOTTOM | LEFT         : '┐',
+        BOTTOM        | RIGHT : '┌',
+        BOTTOM | LEFT | RIGHT : '┬',
+                 LEFT | RIGHT : '─',
 }
 
 
@@ -294,7 +294,7 @@ def finalizeGit(parts, indented):
   parts.append(line)
 
 def getGit(parts):
-  if isGit():
+  if isGit() and not '.git' in os.getcwd():
     indented = gitStatus(parts)
     indented = gitOutgoing(parts, gitRemote(gitBranch()), indented)
     finalizeGit(parts, indented)
