@@ -338,8 +338,10 @@ def svnStatus(parts):
 def finalizeSvn(parts, indented):
   line = lines[TOP | BOTTOM | RIGHT] + lines[LEFT | RIGHT]
   if indented:
-    line = lines[BOTTOM | RIGHT] + lines[TOP | LEFT | RIGHT]
-    line += trailOff()
+    line = lines[BOTTOM | RIGHT] + lines[TOP | LEFT | RIGHT] +    \
+           lines[LEFT | RIGHT]
+  line += box("Subversion", color(CYAN))
+  line += trailOff()
   parts.append(line)
 
 @createTimeout(.5)
