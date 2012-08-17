@@ -17,7 +17,7 @@ BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 FLAGS = [1<<n for n in range(32)]
 TOP, BOTTOM, LEFT, RIGHT = FLAGS[:4]
 
-lines = {
+line_types = { 'clean' : {
   TOP | BOTTOM | LEFT | RIGHT : '┼',
   TOP | BOTTOM | LEFT         : '┤',
   TOP | BOTTOM        | RIGHT : '├',
@@ -29,7 +29,35 @@ lines = {
         BOTTOM        | RIGHT : '┌',
         BOTTOM | LEFT | RIGHT : '┬',
                  LEFT | RIGHT : '─',
-}
+},
+'retro' : {
+  TOP | BOTTOM | LEFT | RIGHT : '+',
+  TOP | BOTTOM | LEFT         : '+',
+  TOP | BOTTOM        | RIGHT : '+',
+  TOP | BOTTOM                : '|',
+  TOP          | LEFT | RIGHT : '+',
+  TOP          | LEFT         : '/',
+  TOP                 | RIGHT : '\\',
+        BOTTOM | LEFT         : '\\',
+        BOTTOM        | RIGHT : '/',
+        BOTTOM | LEFT | RIGHT : '+',
+                 LEFT | RIGHT : '-',
+},
+'sparse' : {
+  TOP | BOTTOM | LEFT | RIGHT : ' ',
+  TOP | BOTTOM | LEFT         : '┤',
+  TOP | BOTTOM        | RIGHT : '├',
+  TOP | BOTTOM                : ' ',
+  TOP          | LEFT | RIGHT : ' ',
+  TOP          | LEFT         : ' ',
+  TOP                 | RIGHT : ' ',
+        BOTTOM | LEFT         : ' ',
+        BOTTOM        | RIGHT : ' ',
+        BOTTOM | LEFT | RIGHT : ' ',
+                 LEFT | RIGHT : ' ',
+}}
+
+lines = line_types['clean']
 
 
 def createTimeout(seconds):
@@ -293,6 +321,7 @@ def finalizeGit(parts, indented):
   line += trailOff()
   parts.append(line)
 
+@createTimeout(.5)
 def getGit(parts):
   if isGit() and not '.git' in os.getcwd():
     indented = gitStatus(parts)
@@ -422,15 +451,13 @@ def getDue(parts):
 def main():
   parts = []
   getMain(parts)
-  # getWeb(parts)
   getDue(parts)
+
+  # Version Control
   getGit(parts)
   getSvn(parts)
-  # prompt = getWeb()
-  # prompt += getGit()
-  parts.append(lines[TOP | RIGHT] + lines[LEFT | RIGHT] + color(RED) + "\$ " + 
-                reset())
-  maxlen = 0
+
+  parts.append(lines[TOP | RIGHT] + lines[LEFT | RIGHT] + color(RED) + "\$ " + reset())
   retval = '\n'.join(parts)
   print retval
 

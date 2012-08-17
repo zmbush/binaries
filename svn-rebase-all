@@ -1,0 +1,2 @@
+#!/bin/bash
+git branch | sed -r 's/[* ]//g' | xargs -I % sh -c 'git checkout "%"; git svn rebase; echo'
