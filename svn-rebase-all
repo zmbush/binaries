@@ -1,2 +1,19 @@
 #!/bin/bash
-git branch | sed -r 's/[* ]//g' | xargs -I % sh -c 'git checkout "%"; git svn rebase; echo'
+echo Remembering current branch
+OLD_BRANCH=$(git branch | grep "*" | sed -r 's/[* ]//g')
+echo
+echo Current Branch: $OLD_BRANCH
+echo
+echo Rebasing all branches
+echo
+for branch in $(git branch | sed -r 's/[* ]//g'); do
+  git checkout $branch
+  git svn rebase
+  echo
+done
+echo
+echo "Returning to original branch ($OLD_BRANCH)"
+echo
+git checkout $OLD_BRANCH
+echo
+echo Done
