@@ -11,7 +11,6 @@ for branch in $(git branch | sed -r 's/[* ]//g'); do
   git svn rebase
   echo
 done
-echo
 echo "Returning to original branch ($OLD_BRANCH)"
 echo
 git checkout $OLD_BRANCH
