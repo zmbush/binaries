@@ -392,7 +392,14 @@ def getDue(parts):
       del currDir[-1]
   if openedFile == None:
     return
-  timeText = openedFile.read().strip()
+  timeText = openedFile.readline().strip()
+  custom = (openedFile.readline().strip(),
+            openedFile.readline().strip(),
+            openedFile.readline().strip())
+  if custom[0] == '' or custom[1] == '' or custom[2] == '':
+    words = ('Project', 'is due in', 'was due')
+  else:
+    words = custom
   timeData = None
   try:
     timeData = time.mktime(time.strptime(timeText))
@@ -434,11 +441,11 @@ def getDue(parts):
   due = due.strip()
   line = lines[TOP | BOTTOM | RIGHT] + lines[LEFT | RIGHT]
 
-  mess = color(MAGENTA) + "Project"
+  mess = color(MAGENTA) + words[0] + " "
   if not pastDue:
-    mess += " due in: " + color(CYAN)
+    mess += words[1] + ": " + color(CYAN)
   else:
-    mess += " was due: " + color(RED)
+    mess += words[2] + ": " + color(RED)
   if due != "":
     mess += due
     if pastDue:
