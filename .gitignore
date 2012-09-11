@@ -7,6 +7,9 @@ hc
 hunc
 j
 
+# Github git extension
+hub
+
 # Only on meraki devel vm
 fix-resolv
 *.swp
