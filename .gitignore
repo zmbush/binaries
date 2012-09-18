@@ -12,3 +12,6 @@ fix-resolv
 *.swp
 *.so
 *.pyc
+
+# mac stuff
+.DS_Store
