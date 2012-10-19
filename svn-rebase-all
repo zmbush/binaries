@@ -1,14 +1,42 @@
 #!/bin/bash
-echo Remembering current branch
-OLD_BRANCH=$(git branch | grep "*" | sed -r 's/[* ]//g')
-echo
+function cleanup {
+  message=$1
+  error=$2
+
+  echo
+  echo "*** svn-rebase-all failed ***"
+  echo
+  echo $message
+  echo
+  echo Re run command with --continue to finish the process
+  echo $OLD_BRANCH > /tmp/svn-rebase-all.cache
+  echo $branch >> /tmp/svn-rebase-all.cache
+  echo $error >> /tmp/svn-rebase-all.cache
+
+  exit $error
+}
+
+if [ -e "/tmp/svn-rebase-all.cache" ]; then
+  if [ "$1" == "--continue" ]; then
+    continuing=true
+    OLD_BRANCH=$(sed -n '1p' /tmp/svn-rebase-all.cache)
+    continue_branch=$(sed -n '2p' /tmp/svn-rebase-all.cache)
+    error_code=$(sed -n '3p' /tmp/svn-rebase-all.cache)
+    echo "Nice try" $OLD_BRANCH $continue_branch $error_code
+  fi
+fi
+if [ ! $continuing ]; then
+  echo Remembering current branch
+  OLD_BRANCH=$(git branch | grep "*" | sed -r 's/[* ]//g')
+  echo
+fi
 echo Current Branch: $OLD_BRANCH
 echo
 echo Rebasing all branches
 echo
 for branch in $(git branch | sed -r 's/[* ]//g'); do
-  git checkout $branch
-  git svn rebase
+  git checkout $branch || cleanup "Checkout Failed" 1 $branch
+  git svn rebase || cleanup "Rebase Failed" 2 $branch
   echo
 done
 echo "Returning to original branch ($OLD_BRANCH)"
