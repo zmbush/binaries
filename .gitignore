@@ -6,6 +6,7 @@ asciiio
 hc
 hunc
 j
+git-extras
 
 # Only on meraki devel vm
 fix-resolv
