@@ -469,4 +469,7 @@ def main():
   print retval
 
 if __name__ == "__main__":
-  main()
+  try:
+    main()
+  except KeyboardInterrupt as ki:
+    print lines[LEFT | RIGHT] + lines[LEFT | RIGHT] + color(RED) + "\$ " + reset()
