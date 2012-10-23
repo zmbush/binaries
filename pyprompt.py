@@ -421,6 +421,10 @@ def getDue(parts):
   units = reversed(sorted(zip(offsets, amounts)))
 
   v = seconds
+
+  accuracy = 2
+  count = 0
+
   for offset, unit in units:
     this = v / offset
     if type(unit) is tuple:
@@ -431,10 +435,12 @@ def getDue(parts):
       plural = unit + "s"
 
     if this > 1:
+      count += 1
       due += "%d %s " % (this, plural)
-      break
     elif this > 0:
+      count += 1
       due += "%d %s " % (this, singular)
+    if count >= accuracy:
       break
     v = v % offset
 
