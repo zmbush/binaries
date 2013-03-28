@@ -9,7 +9,9 @@ now = datetime.datetime.now()
 fileName = '_posts/' + now.strftime('%Y-%m-%d') + "-notes.markdown"
 pathy = os.getcwd().split('/')
 className = pathy[-2] + " " + pathy[-1]
+newFile = False
 if not os.path.exists(fileName):
+  newFile = True
   previousFile = None
   for fn in sorted(os.listdir('_posts')):
     if re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}', fn):
@@ -31,7 +33,10 @@ if not os.path.exists(fileName):
   f.write('topic:\n')
   f.write('---\n\n')
   f.close()
-subprocess.call(['vim', '-cset spell', fileName, '+'])
+if newFile:
+  subprocess.call(['vim', '-cset spell', fileName, '+4'])
+else:
+  subprocess.call(['vim', '-cset spell', fileName, '+'])
 subprocess.call(['git', 'add', fileName])
 
 message = raw_input('What topic are you talking about? ')

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding=UTF-8
 
 """
@@ -13,6 +14,9 @@ import time
 import signal
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+ZSH = False
+if 'zsh' in sys.argv:
+  ZSH = True
 
 FLAGS = [1<<n for n in range(32)]
 TOP, BOTTOM, LEFT, RIGHT = FLAGS[:4]
@@ -90,19 +94,34 @@ def getSubprocessOutput(arguments):
     raise subprocess.CalledProcessError('fail', 'fail')
 
 def bgcolor(col, bg):
-  return '\[\033[0;%d;%dm\]' % (col + 30, bg + 40)
+  if ZSH:
+    return '%%{\033[0;%d;%dm%%}' % (col + 30, bg + 40)
+  else:
+    return '\[\033[0;%d;%dm\]' % (col + 30, bg + 40)
 
 def color(col):
-  return '\[\033[0;%dm\]' % (col + 30)
+  if ZSH:
+    return '%%{\033[0;%dm%%}' % (col + 30)
+  else:
+    return '\[\033[0;%dm\]' % (col + 30)
 
 def bcolor(col):
-  return '\[\033[1;%dm\]' % (col + 30)
+  if ZSH:
+    return '%%{\033[1;%dm%%}' % (col + 30)
+  else:
+    return '\[\033[1;%dm\]' % (col + 30)
 
 def bold():
-  return '\[\033[1m\]'
+  if ZSH:
+    return '%{\033[1m%}'
+  else:
+    return '\[\033[1m\]'
 
 def reset():
-  return '\[\033[0m\]'
+  if ZSH:
+    return '%{\033[0m%}'
+  else:
+    return '\[\033[0m\]'
 
 def inline(text, width, attr = color(MAGENTA)):
   remain = width - len(text) - 2
@@ -157,13 +176,19 @@ def getWeb(parts):
   else:
     line += box('/'.join(cwd).replace(os.environ['HOME'], '~'))
     line += lines[LEFT | RIGHT]
-    line += box("\H") + trailOff()
+    if ZSH:
+      line += box("%m") + trailOff()
+    else:
+      line += box("\H") + trailOff()
     parts.append(line)
   return parts
 
 def getMain(parts):
   line = reset() + lines[BOTTOM | RIGHT] + lines[LEFT | RIGHT]
-  line += box('\w') + lines[LEFT | RIGHT] + box('\H') + trailOff()
+  if ZSH:
+    line += box('%c') + lines[LEFT | RIGHT] + box('%m') + trailOff()
+  else:
+    line += box('\w') + lines[LEFT | RIGHT] + box('\H') + trailOff()
   parts.append(line)
   return parts
 
@@ -457,7 +482,10 @@ def main():
   getGit(parts)
   getSvn(parts)
 
-  parts.append(lines[TOP | RIGHT] + lines[LEFT | RIGHT] + color(RED) + "\$ " + reset())
+  if ZSH:
+    parts.append(lines[TOP | RIGHT] + lines[LEFT | RIGHT] + color(RED) + "%# " + reset())
+  else:
+    parts.append(lines[TOP | RIGHT] + lines[LEFT | RIGHT] + color(RED) + "\$ " + reset())
   retval = '\n'.join(parts)
   print retval
 
