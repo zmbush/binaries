@@ -6,6 +6,7 @@ asciiio
 hc
 hunc
 j
+git-extras
 
 # Github git extension
 hub
@@ -15,3 +16,6 @@ fix-resolv
 *.swp
 *.so
 *.pyc
+
+# mac stuff
+.DS_Store
