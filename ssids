@@ -1,0 +1,12 @@
+#!/bin/bash
+
+while true; do
+  SSIDS=$(sudo iwlist scanning 2> /dev/null | grep ESSID | awk '{ 
+    split($1, a, ":");
+    gsub(/"/, "", a[2]);
+    print a[2];
+  }' | sort -u)
+  clear
+  echo "$SSIDS"
+  sleep 10
+done
