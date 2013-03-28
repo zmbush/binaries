@@ -343,6 +343,8 @@ def isSvn():
       return False
   except subprocess.CalledProcessError as e:
     return False
+  except OSError as e:
+    return False
 
 @createTimeout(.5)
 def svnStatus(parts):
