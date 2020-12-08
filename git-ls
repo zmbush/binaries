@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for D in "$@"; do
+  DIR=${D%/}
+  (cd $DIR; git ls-files -o -c -X .gitignore | sed "s#^#$DIR/#")
+done

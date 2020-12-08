@@ -1,0 +1,29 @@
+#!/bin/bash
+
+WATCH_DIRS=()
+CMD=""
+
+function join { local IFS="$1"; shift; echo "$*"; }
+
+while [ "$1" != "" ]; do
+  case $1 in
+    --)
+      shift
+      break
+      ;;
+    * )
+      WATCH_DIRS+=("$1")
+      ;;
+  esac
+  shift
+done
+
+CMD=( "$@" )
+
+while true; do
+  FILES=$(git ls ${WATCH_DIRS[@]})
+  COMMAND="(reset; ${CMD[@]})"
+  echo "$FILES" | entr -d sh -c "$COMMAND"
+  echo "Done!"
+  sleep 1
+done

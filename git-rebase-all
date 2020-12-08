@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+
+initial_branch=$(git branch --show-current)
+
+git fetch origin >/dev/null 2>&1
+not_rebased=$(git branch --no-merged origin/master | sed 's/*//g')
+
+for branch in $not_rebased; do
+  git checkout $branch >/dev/null 2>&1
+  git rebase origin/master >/dev/null 2>&1 || {
+    echo "Failed to rebase $branch"
+    git diff --name-only --diff-filter=U | awk '{ print "\t" $0 }' | head
+    git rebase --abort >/dev/null 2>&1
+  }
+done
+
+echo "Restoring original branch ($initial_branch)"
+git checkout $initial_branch >/dev/null 2>&1
